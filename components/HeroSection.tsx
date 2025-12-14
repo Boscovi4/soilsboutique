@@ -1,41 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { HERO_IMAGE } from '../constants';
 import { Product } from '../types';
 
 interface HeroSectionProps {
   products?: Product[];
+  onAction?: (type: 'whatsapp' | 'cart', product: Product) => void;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ products = [] }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ products = [], onAction }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Filter for hot items
   const hotProducts = products.filter(p => p.isHot);
 
-  // Define the static slide
-  const staticSlide = {
-    id: 'static-hero',
-    image: HERO_IMAGE,
-    subtitle: 'Big Sale',
-    title: 'DISKONTU NATAL NIAN',
-    description: 'UP TO 25% OFF',
+  // Only display product that marked as HOT item
+  const slides = hotProducts.map(p => ({
+    id: p.id,
+    image: p.imageUrl,
+    subtitle: 'HOT ITEM',
+    title: p.name,
+    description: `$${p.price.toFixed(2)}`,
     buttonText: 'Hola imi nian agora',
-    isProduct: false
-  };
-
-  // Combine into one array of slides
-  const slides = [
-    staticSlide,
-    ...hotProducts.map(p => ({
-      id: p.id,
-      image: p.imageUrl,
-      subtitle: 'DISKONTU NATAL NIAN',
-      title: p.name,
-      description: `$${p.price.toFixed(2)}`,
-      buttonText: 'Hola imi nian agora',
-      isProduct: true
-    }))
-  ];
+    isProduct: true,
+    product: p
+  }));
 
   useEffect(() => {
     // Only auto-rotate if we have more than 1 slide
@@ -43,18 +30,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ products = [] }) => {
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % slides.length);
-    }, 3000);
+    }, 5000); 
 
     return () => clearInterval(interval);
   }, [slides.length]);
 
-  const handleAction = () => {
-     // Scroll down to shop area
-     const shopSection = document.getElementById('shop-section');
-     if (shopSection) {
-       shopSection.scrollIntoView({ behavior: 'smooth' });
+  const handleSlideAction = (slide: typeof slides[0]) => {
+     if (slide.isProduct && slide.product && onAction) {
+       onAction('whatsapp', slide.product);
      }
   };
+
+  if (slides.length === 0) return null;
 
   return (
     <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[30rem] overflow-hidden bg-gray-200 dark:bg-gray-800">
@@ -81,7 +68,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ products = [] }) => {
               {slide.description}
             </p>
             <button 
-              onClick={handleAction}
+              onClick={() => handleSlideAction(slide)}
               className="w-max border-2 border-white text-white bg-transparent hover:bg-white hover:text-secondary px-8 py-3 rounded-full text-sm md:text-base font-semibold shadow-lg transition-all transform hover:scale-105 backdrop-blur-sm"
             >
               {slide.buttonText}

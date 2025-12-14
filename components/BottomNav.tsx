@@ -15,7 +15,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 }) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-card-dark border-t border-gray-200 dark:border-gray-800 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-      <div className="w-full md:max-w-3xl lg:max-w-7xl mx-auto px-6 pb-safe pt-2 flex justify-between md:justify-center md:gap-20 items-center">
+      <div className="w-full mx-auto px-6 pb-safe pt-2 flex justify-between md:justify-center md:gap-20 items-center">
         <button 
           onClick={onHomeClick}
           className="flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary active:text-primary transition-colors w-12"

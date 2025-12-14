@@ -8,7 +8,7 @@ interface FeaturedProductProps {
   onEdit?: (product: Product) => void;
   onDelete?: (id: string) => void;
   isInCart: boolean;
-  onAddToCart: () => void;
+  onAction: (type: 'whatsapp' | 'cart', product: Product) => void;
 }
 
 export const FeaturedProduct: React.FC<FeaturedProductProps> = ({ 
@@ -17,8 +17,10 @@ export const FeaturedProduct: React.FC<FeaturedProductProps> = ({
   onEdit,
   onDelete,
   isInCart,
-  onAddToCart
+  onAction
 }) => {
+  const colors = product.color ? product.color.split(',').map(c => c.trim()).filter(c => c) : [];
+
   return (
     <div className="relative group h-full">
       <div className={`bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-row h-full relative z-0 ${isAdmin ? 'ring-2 ring-dashed ring-gray-300' : ''}`}>
@@ -37,15 +39,44 @@ export const FeaturedProduct: React.FC<FeaturedProductProps> = ({
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">
             {product.description}
           </p>
+
+          {/* Available Variants Display */}
+          <div className="flex flex-col gap-1.5 mb-3">
+            {product.sizes && product.sizes.length > 0 && (
+               <div className="flex flex-wrap gap-1">
+                  {product.sizes.slice(0, 4).map(size => (
+                     <span key={size} className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300 font-medium border border-gray-200 dark:border-gray-600">
+                       {size}
+                     </span>
+                  ))}
+                  {product.sizes.length > 4 && (
+                    <span className="text-[10px] text-gray-400 self-center">+{product.sizes.length - 4}</span>
+                  )}
+               </div>
+            )}
+            {colors.length > 0 && (
+               <div className="flex flex-wrap gap-1">
+                  {colors.slice(0, 3).map(color => (
+                     <span key={color} className="text-[10px] px-1.5 py-0.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-500 dark:text-gray-400">
+                        {color}
+                     </span>
+                  ))}
+                   {colors.length > 3 && (
+                    <span className="text-[10px] text-gray-400 self-center">+{colors.length - 3}</span>
+                  )}
+               </div>
+            )}
+          </div>
+
           <div className="flex flex-col gap-2 mt-auto">
             <span className="text-primary font-bold text-lg">
               ${product.price.toFixed(2)}
             </span>
             <ProductActions 
-              productName={product.name} 
+              product={product} 
               fullWidth={true} 
               isInCart={isInCart}
-              onAddToCart={onAddToCart}
+              onAction={onAction}
             />
           </div>
         </div>
@@ -72,15 +103,15 @@ export const FeaturedProduct: React.FC<FeaturedProductProps> = ({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (window.confirm(`Are you sure you want to delete "${product.name}"? This action cannot be undone and the product will be permanently removed from the store.`)) {
+              if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
                 onDelete?.(product.id);
               }
             }}
-            className="bg-red-600 text-white px-1.5 py-1.5 rounded-full hover:bg-red-700 transition-colors shadow-xl backdrop-blur-md border border-white/20 flex items-center gap-1"
-            title="Bye Me (Delete Product)"
+            className="bg-red-600 text-white px-3 py-1.5 rounded-full hover:bg-red-700 transition-colors shadow-xl backdrop-blur-md border border-white/20 flex items-center gap-1"
+            title="Delete Product"
           >
             <span className="material-icons text-sm">delete</span>
-            <span className="text-[10px] font-bold uppercase">Bye Me</span>
+            <span className="text-[10px] font-bold uppercase">Delete</span>
           </button>
         </div>
       )}

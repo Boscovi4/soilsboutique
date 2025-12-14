@@ -1,5 +1,6 @@
 import React from 'react';
 import { Product } from '../types';
+import { WHATSAPP_NUMBER } from '../constants';
 
 interface WishlistModalProps {
   isOpen: boolean;
@@ -17,6 +18,14 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
   onMoveToCart
 }) => {
   if (!isOpen) return null;
+
+  const handleBuyNow = (productName: string) => {
+    const text = `Olá, ha'u interese ho ${productName}. Sei iha ka lae?`;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
+    const url = `${baseUrl}?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex justify-end">
@@ -60,11 +69,11 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                                 </div>
                                 <div className="flex gap-2 mt-2">
                                     <button 
-                                        onClick={() => onMoveToCart(item)}
-                                        className="flex-1 bg-secondary text-white py-1.5 px-3 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1 hover:bg-opacity-90 transition-colors"
+                                        onClick={() => handleBuyNow(item.name)}
+                                        className="flex-1 bg-green-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1 hover:bg-green-700 transition-colors"
                                     >
                                         <span>Hola Agora</span>
-                                        <span className="material-icons text-[14px]">add_shopping_cart</span>
+                                        <span className="material-icons text-[14px]">whatsapp</span>
                                     </button>
                                     <button 
                                         onClick={() => onRemoveItem(item.id)}

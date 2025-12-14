@@ -1,43 +1,31 @@
 import React from 'react';
-import { WHATSAPP_NUMBER } from '../constants';
+import { Product } from '../types';
 
 interface ProductActionsProps {
-  productName: string;
+  product: Product;
   className?: string;
   fullWidth?: boolean;
   isInCart: boolean;
-  onAddToCart: () => void;
+  onAction: (type: 'whatsapp' | 'cart', product: Product) => void;
 }
 
 export const ProductActions: React.FC<ProductActionsProps> = ({ 
-  productName, 
+  product, 
   className = '', 
   fullWidth = false,
   isInCart,
-  onAddToCart
+  onAction
 }) => {
   const handleWhatsApp = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering parent click events
-    const text = `Olá, Ha'u interese ho ${productName}. Sei iha ka lae?`;
-    
-    // Check if it's a mobile device to use api.whatsapp.com vs web.whatsapp.com
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
-    
-    const url = `${baseUrl}?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
+    e.stopPropagation(); 
+    onAction('whatsapp', product);
   };
 
   const handleAddToCartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onAddToCart();
+    onAction('cart', product);
   };
 
-  // Styles to match the provided reference image
-  // - h-9: Comfortable touch target (36px)
-  // - text-[10px] sm:text-xs: Readable but fits 2 buttons
-  // - rounded: Matches the button radius in the image
-  // - uppercase font-bold: Matches the typography
   const btnClasses = "h-9 px-1 rounded shadow-sm hover:brightness-110 transition-all active:scale-95 flex items-center justify-center gap-1.5 font-bold text-[10px] sm:text-xs uppercase w-full whitespace-nowrap overflow-hidden";
 
   if (isInCart) {
