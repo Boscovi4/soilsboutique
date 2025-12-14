@@ -28,13 +28,13 @@ export const NavBar: React.FC<NavBarProps> = ({
           <span className="text-primary ml-1.5">BOUTIQUE</span>
         </h1>
         <div className="flex items-center space-x-3">
-          {/* Admin Toggle */}
+          {/* Admin/Profile Quick Link */}
           <button 
             onClick={onToggleAdmin}
-            className={`p-1.5 rounded-full transition-all ${isAdmin ? 'bg-primary text-white ring-2 ring-offset-1 ring-primary' : 'text-gray-400 hover:bg-gray-100'}`}
-            title="Toggle Admin Mode"
+            className={`p-1.5 rounded-full transition-all ${isAdmin ? 'bg-secondary text-white' : 'text-gray-400 hover:bg-gray-100'}`}
+            title={isAdmin ? "Go to Profile (Admin)" : "Login"}
           >
-            <span className="material-icons text-sm">{isAdmin ? 'edit' : 'lock'}</span>
+            <span className="material-icons text-sm">{isAdmin ? 'manage_accounts' : 'person_outline'}</span>
           </button>
 
           <button 

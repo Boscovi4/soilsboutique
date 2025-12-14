@@ -23,3 +23,16 @@ export interface Category {
   id: string;
   name: string;
 }
+
+export interface UserProfile {
+  id: string;
+  fullName: string;
+  username: string;
+  email: string;
+  avatarUrl?: string;
+  role: 'admin' | 'user';
+  preferences: {
+    notifications: boolean;
+    language: 'en' | 'tetum' | 'pt';
+  };
+}
