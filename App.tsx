@@ -10,6 +10,7 @@ import { CartModal } from './components/CartModal';
 import { WishlistModal } from './components/WishlistModal';
 import { LoginModal } from './components/LoginModal';
 import { ProductVariantModal } from './components/ProductVariantModal';
+import { BulkUploadModal } from './components/BulkUploadModal';
 import { Toast } from './components/Toast';
 import { PRODUCTS, WHATSAPP_NUMBER, CATEGORIES } from './constants';
 import { Product } from './types';
@@ -47,6 +48,7 @@ const App: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [variantModalOpen, setVariantModalOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   
   // Selected Product State
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
@@ -123,6 +125,11 @@ const App: React.FC = () => {
         return [product, ...prev];
       }
     });
+  };
+
+  const handleBulkUpload = (newProducts: Product[]) => {
+    setProducts(prev => [...newProducts, ...prev]);
+    showToast(`Successfully added ${newProducts.length} products!`);
   };
 
   const handleDeleteProduct = (id: string) => {
@@ -271,13 +278,20 @@ const App: React.FC = () => {
 
           {/* Admin Add Button */}
           {isAdmin && (
-            <div className="px-4 mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="px-4 mb-6 grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
                <button 
                 onClick={handleAddProduct}
-                className="w-full bg-secondary text-white border-2 border-dashed border-gray-400 p-6 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-opacity-90 transition-colors shadow-lg"
+                className="bg-secondary text-white border-2 border-dashed border-gray-400 p-6 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-opacity-90 transition-colors shadow-lg"
                >
                  <span className="material-icons text-3xl">add_circle_outline</span>
-                 <span className="font-semibold">Add New Product</span>
+                 <span className="font-semibold text-sm">Add Single Product</span>
+               </button>
+               <button 
+                onClick={() => setIsBulkModalOpen(true)}
+                className="bg-primary text-white border-2 border-dashed border-gray-400 p-6 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-opacity-90 transition-colors shadow-lg"
+               >
+                 <span className="material-icons text-3xl">playlist_add</span>
+                 <span className="font-semibold text-sm">Bulk Upload (CSV)</span>
                </button>
             </div>
           )}
@@ -408,6 +422,12 @@ const App: React.FC = () => {
         onDelete={handleDeleteProduct}
       />
       
+      <BulkUploadModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        onUpload={handleBulkUpload}
+      />
+
       <CartModal 
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}

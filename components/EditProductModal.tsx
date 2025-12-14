@@ -65,9 +65,14 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
         color: product.color || ''
       });
     } else {
-      setFormData({
+      resetForm();
+    }
+  }, [product, isOpen]);
+
+  const resetForm = () => {
+    setFormData({
         name: '',
-        price: '', // Start empty for new products
+        price: '', 
         description: '',
         imageUrl: '',
         images: [],
@@ -77,8 +82,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
         sizes: [],
         color: ''
       });
-    }
-  }, [product, isOpen]);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -120,10 +124,6 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
 
   const setMainImage = (index: number) => {
     setFormData(prev => {
-      const newMain = prev.images[index];
-      // Move new main to front of array? Or just set imageUrl?
-      // Let's just set imageUrl for now, but keeping order is nice.
-      // Strategy: Reorder array so selected is first.
       const newImages = [...prev.images];
       const [selected] = newImages.splice(index, 1);
       newImages.unshift(selected);
@@ -147,20 +147,17 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const prepareProduct = (): Product | null => {
     const priceValue = parseFloat(formData.price);
-
-    // Require at least one image
     const finalImageUrl = formData.images.length > 0 ? formData.images[0] : formData.imageUrl;
 
     if (!formData.name || !formData.price || isNaN(priceValue) || !finalImageUrl) {
       alert("Please fill in required fields (Name, Price, Image)");
-      return;
+      return null;
     }
-    
-    onSave({
-      id: product?.id || Date.now().toString(),
+
+    return {
+      id: product?.id || Date.now().toString() + Math.random().toString().slice(2, 6),
       name: formData.name,
       price: priceValue,
       description: formData.description || undefined,
@@ -171,8 +168,28 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
       isHot: formData.isHot,
       sizes: formData.sizes,
       color: formData.color
-    });
-    onClose();
+    };
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newProduct = prepareProduct();
+    if (newProduct) {
+        onSave(newProduct);
+        onClose();
+    }
+  };
+
+  const handleSaveAndAddAnother = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const newProduct = prepareProduct();
+    if (newProduct) {
+        onSave(newProduct);
+        resetForm();
+        // Optional: Scroll to top of form or focus name input could be added here
+        const nameInput = document.getElementById('prod-name-input');
+        if (nameInput) nameInput.focus();
+    }
   };
 
   if (!isOpen) return null;
@@ -264,6 +281,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
             <div className="space-y-1">
               <label className="text-xs font-semibold text-gray-500">Name</label>
               <input
+                id="prod-name-input"
                 type="text"
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -374,28 +392,41 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="pt-4 flex gap-3">
-            {product && (
-              <button
-                type="button"
-                onClick={() => {
-                  if(window.confirm(`Are you sure you want to delete "${product.name}"? This action cannot be undone.`)) {
-                    onDelete(product.id);
-                  }
-                }}
-                className="flex-1 bg-red-600 text-white py-2 rounded font-medium text-sm hover:bg-red-700 transition flex items-center justify-center gap-2 shadow-md"
-              >
-                <span className="material-icons text-sm">delete</span>
-                Delete Product
-              </button>
+          <div className="pt-4 flex flex-col gap-2">
+            <div className="flex gap-3">
+                {product && (
+                <button
+                    type="button"
+                    onClick={() => {
+                    if(window.confirm(`Are you sure you want to delete "${product.name}"? This action cannot be undone.`)) {
+                        onDelete(product.id);
+                    }
+                    }}
+                    className="flex-1 bg-red-600 text-white py-2 rounded font-medium text-sm hover:bg-red-700 transition flex items-center justify-center gap-2 shadow-md"
+                >
+                    <span className="material-icons text-sm">delete</span>
+                    Delete
+                </button>
+                )}
+                <button
+                type="submit"
+                className="flex-[2] bg-primary text-white py-2 rounded font-medium text-sm hover:bg-opacity-90 transition shadow-lg flex items-center justify-center gap-2"
+                >
+                <span className="material-icons text-sm">save</span>
+                {product ? 'Save Changes' : 'Save'}
+                </button>
+            </div>
+            
+            {!product && (
+                <button
+                    type="button"
+                    onClick={handleSaveAndAddAnother}
+                    className="w-full bg-secondary text-white py-2 rounded font-medium text-sm hover:bg-opacity-90 transition shadow-md flex items-center justify-center gap-2"
+                >
+                    <span className="material-icons text-sm">playlist_add</span>
+                    Save & Add Another
+                </button>
             )}
-            <button
-              type="submit"
-              className="flex-[2] bg-primary text-white py-2 rounded font-medium text-sm hover:bg-opacity-90 transition shadow-lg flex items-center justify-center gap-2"
-            >
-              <span className="material-icons text-sm">save</span>
-              {product ? 'Save Changes' : 'Create Product'}
-            </button>
           </div>
         </form>
       </div>
