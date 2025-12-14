@@ -61,12 +61,30 @@ const App: React.FC = () => {
 
   // --- Persistence & Sync ---
   
-  // 1. Save to localStorage whenever products change
+  // 1. Data Hydration: Merge new demo products from code if they are missing in localStorage
+  useEffect(() => {
+    setProducts(prevProducts => {
+      // Get IDs of currently stored products
+      const currentIds = new Set(prevProducts.map(p => p.id));
+      
+      // Find products in constants.ts that are NOT in storage
+      const missingProducts = PRODUCTS.filter(p => !currentIds.has(p.id));
+      
+      if (missingProducts.length > 0) {
+        console.log(`Hydrating ${missingProducts.length} new products from code...`);
+        // Append missing products to the state
+        return [...prevProducts, ...missingProducts];
+      }
+      return prevProducts;
+    });
+  }, []);
+
+  // 2. Save to localStorage whenever products change
   useEffect(() => {
     localStorage.setItem('soils-products', JSON.stringify(products));
   }, [products]);
 
-  // 2. Save user
+  // 3. Save user
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem('soils-current-user', JSON.stringify(currentUser));
@@ -75,14 +93,13 @@ const App: React.FC = () => {
     }
   }, [currentUser]);
 
-  // 3. Listen for changes from other tabs (Cross-tab Sync)
+  // 4. Listen for changes from other tabs (Cross-tab Sync)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'soils-products' && e.newValue) {
         try {
           const syncedProducts = JSON.parse(e.newValue);
           setProducts(syncedProducts);
-          // Optional: Show a subtle toast or just update silently
         } catch (err) {
           console.error("Failed to sync products from storage event", err);
         }
