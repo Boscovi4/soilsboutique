@@ -59,11 +59,14 @@ const App: React.FC = () => {
   const [variantAction, setVariantAction] = useState<'cart' | 'whatsapp' | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // --- Persistence ---
+  // --- Persistence & Sync ---
+  
+  // 1. Save to localStorage whenever products change
   useEffect(() => {
     localStorage.setItem('soils-products', JSON.stringify(products));
   }, [products]);
 
+  // 2. Save user
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem('soils-current-user', JSON.stringify(currentUser));
@@ -71,6 +74,24 @@ const App: React.FC = () => {
       localStorage.removeItem('soils-current-user');
     }
   }, [currentUser]);
+
+  // 3. Listen for changes from other tabs (Cross-tab Sync)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'soils-products' && e.newValue) {
+        try {
+          const syncedProducts = JSON.parse(e.newValue);
+          setProducts(syncedProducts);
+          // Optional: Show a subtle toast or just update silently
+        } catch (err) {
+          console.error("Failed to sync products from storage event", err);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -109,6 +130,13 @@ const App: React.FC = () => {
   const handleUpdateProfile = (updatedUser: UserProfile) => {
     setCurrentUser(updatedUser);
     showToast('Profile updated successfully');
+  };
+
+  const handleResetData = () => {
+    if (window.confirm('Are you sure you want to reset all product data to defaults? This cannot be undone.')) {
+      setProducts(PRODUCTS);
+      showToast('Product data reset to defaults', 'info');
+    }
   };
 
   const handleProfileClick = () => {
@@ -222,8 +250,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full mx-auto bg-white dark:bg-background-dark relative">
-      {/* Conditionally render NavBar only in Shop View, or keep it but change buttons? 
-          ProfilePage has its own header. Let's hide NavBar when in Profile view to give it a native app feel. */}
+      {/* Conditionally render NavBar only in Shop View */}
       {currentView === 'shop' && (
         <NavBar 
           isAdmin={isAdmin} 
@@ -242,6 +269,8 @@ const App: React.FC = () => {
             onSave={handleUpdateProfile} 
             onLogout={handleLogout}
             onBack={handleHomeClick}
+            onResetData={handleResetData}
+            isAdmin={isAdmin}
           />
         ) : (
           /* SHOP VIEW */

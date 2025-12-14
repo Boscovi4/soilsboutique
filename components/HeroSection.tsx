@@ -24,12 +24,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ products = [], onActio
     product: p
   }));
 
+  // Safety check for deleted items
+  useEffect(() => {
+    if (currentIndex >= slides.length && slides.length > 0) {
+      setCurrentIndex(0);
+    }
+  }, [slides.length, currentIndex]);
+
   useEffect(() => {
     // Only auto-rotate if we have more than 1 slide
     if (slides.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % slides.length);
+      setCurrentIndex((prev) => {
+          const next = prev + 1;
+          return next >= slides.length ? 0 : next;
+      });
     }, 5000); 
 
     return () => clearInterval(interval);

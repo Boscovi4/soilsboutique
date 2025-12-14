@@ -6,9 +6,11 @@ interface ProfilePageProps {
   onSave: (updatedUser: UserProfile) => void;
   onLogout: () => void;
   onBack: () => void;
+  onResetData: () => void;
+  isAdmin: boolean;
 }
 
-export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onSave, onLogout, onBack }) => {
+export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onSave, onLogout, onBack, onResetData, isAdmin }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<UserProfile>(user);
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
@@ -215,12 +217,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onSave, onLogout
                 </select>
               </div>
               
-               {/* Save button for preferences only appears if changes are made to preferences via state sync, 
-                   but for simplicity we auto-save preferences or add a button. 
-                   Here we'll use the main Save logic or a specific button if needed. 
-                   Let's add a specific save for this section or rely on the parent 'onSave' being called immediately for switches.
-                   For this demo, let's add a manual Save Settings button to be explicit.
-               */}
                <button 
                  onClick={() => onSave(formData)}
                  className="mt-4 w-full py-2 bg-secondary text-white rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
@@ -263,6 +259,20 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onSave, onLogout
                 </button>
               </form>
             </div>
+
+            {/* Admin Controls */}
+            {isAdmin && (
+              <div className="bg-white dark:bg-card-dark rounded-xl shadow-sm p-6 border-l-4 border-red-500">
+                <h3 className="font-bold text-lg mb-2 text-red-600">Danger Zone</h3>
+                <p className="text-sm text-gray-500 mb-4">Resetting data will restore the default product catalog and delete all your changes. This is useful if the live data gets corrupted.</p>
+                <button 
+                  onClick={onResetData}
+                  className="w-full py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg font-bold text-sm hover:bg-red-100 transition-colors"
+                >
+                  Reset Store Data to Defaults
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
